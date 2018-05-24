@@ -18,6 +18,8 @@
   "homepage": "https://github.com/dayfine/node-minesweep#readme",
   "dependencies": {
     "blessed": "^0.1.81",
-    "jest": "^22.4.4"
+    "chalk": "^2.4.1",
+    "jest": "^22.4.4",
+    "minimist": "^1.2.0"
   }
 }

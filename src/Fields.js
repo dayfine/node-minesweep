@@ -17,9 +17,12 @@ class Field {
   }
 
   checkFieldBombCount (board) {
-    const neighbours = board.getNeighbours(this)
+    // this one has already been checked!
+    if (this.state.displayValue) return
 
+    const neighbours = board.getNeighbours(this)
     let bombCount = 0
+
     neighbours.forEach(field => {
       if (field.hasBomb) {
         bombCount += 1
@@ -32,7 +35,8 @@ class Field {
   }
 
   flagAsBomb () {
-    this.state.flagged = true
+    // feel free to unflag it
+    this.state.flagged = !this.state.flagged
   }
 
   getNeighbours (board) {
@@ -68,7 +72,7 @@ class MineFields {
   assignBombs (bombCount) {
     // randomly assign the given number of bombs to the board
     function getRandomInt (min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min
+      return Math.floor(Math.random() * (max - min)) + min
     }
     const height = this.board.length
     const width = this.board[0].length

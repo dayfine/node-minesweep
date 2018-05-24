@@ -3,6 +3,8 @@ const MineFields = require('./Fields')
 class MineSweeperGame {
   constructor () {
     this.state = {
+      board: null,
+      cursorPos: null
     }
   }
 
