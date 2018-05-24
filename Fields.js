@@ -12,6 +12,10 @@ class Field {
     }
   }
 
+  inspect (depth, opts) {
+    return `<Field bomb:${this.hasBomb}>`
+  }
+
   checkFieldBombCount (board) {
     const neighbours = board.getNeighbours(this)
 
@@ -57,10 +61,33 @@ class MineFields {
         return new Field([row, col])
       })
     })
+
+    this.assignBombs(bombCount)
   }
 
   assignBombs (bombCount) {
     // randomly assign the given number of bombs to the board
+    function getRandomInt (min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min
+    }
+    const height = this.board.length
+    const width = this.board[0].length
+    const totalFieldCount = height * width
+
+    if (bombCount > totalFieldCount) {
+      throw new RangeError('Bomb count is larger than the size of the board')
+    }
+
+    const seen = new Set()
+    while (seen.size < bombCount) {
+      const idx = getRandomInt(0, totalFieldCount)
+      if (seen.has(idx)) continue
+
+      seen.add(idx)
+      const row = Math.floor(idx / width)
+      const col = idx % width
+      this.board[row][col].hasBomb = true
+    }
   }
 }
 
