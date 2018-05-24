@@ -30,29 +30,18 @@ class Field {
   flagAsBomb () {
     this.state.flagged = true
   }
-}
 
-class MineFields {
-  constructor (height, width, bombCount) {
-    // make 2-D array as board
-    this.height = height
-    this.width = width
-
-    this.board = []
-  }
-
-  assignBombs (bombCount) {
-    // randomly assign the given number of bombs to the board
-  }
-
-  getNeighbours (field) {
+  getNeighbours (board) {
+    const height = board.length
+    const width = board[0].length
     const neighbours = []
+
     ;[[1, 1], [1, 0], [1, -1], [0, 1], [0, -1], [-1, 1], [-1, 0], [-1, -1]]
       .forEach(([x, y]) => {
-        const nx = field.x + x
-        const ny = field.y + y
-        if (nx >= 0 && nx <= this.height && ny >= 0 && ny <= this.width) {
-          neighbours.push(this.board[nx][ny])
+        const nx = this.x + x
+        const ny = this.y + y
+        if (nx >= 0 && nx <= height && ny >= 0 && ny <= width) {
+          neighbours.push(board[nx][ny])
         }
       })
 
@@ -60,4 +49,19 @@ class MineFields {
   }
 }
 
-export default MineFields
+class MineFields {
+  constructor (height, width, bombCount) {
+    // make 2-D array as board
+    this.board = [...new Array(height)].map((_, row) => {
+      return [...new Array(width)].map((_, col) => {
+        return new Field([row, col])
+      })
+    })
+  }
+
+  assignBombs (bombCount) {
+    // randomly assign the given number of bombs to the board
+  }
+}
+
+module.exports = MineFields

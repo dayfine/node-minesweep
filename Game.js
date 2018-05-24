@@ -1,11 +1,14 @@
+const MineFields = require('./Fields')
+
 class MineSweeperGame {
   constructor () {
     this.state = {
     }
   }
 
-  initGame () {
+  init () {
     // start a game by initiating the state
+    this.minefields = new MineFields(10, 20, 10)
   }
 
   updateGameState () {
@@ -21,4 +24,4 @@ class MineSweeperGame {
   }
 }
 
-export default MineSweeperGame
+module.exports = MineSweeperGame
