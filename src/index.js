@@ -9,13 +9,13 @@ const game = new MineSweeperGame()
 
 game.init()
 
-const question = {
+const initialPrompt = {
   name: 'initialPrompt',
   message: `what's up?`
 }
 
-inquirer
-  .prompt([question])
-  .then(answers => {
-    console.log(answers)
-  })
+const myInquirer = question => {
+  return inquirer.prompt([question])
+}
+
+game.play(initialPrompt, myInquirer)
