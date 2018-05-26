@@ -67,6 +67,8 @@ class MineFields {
     })
 
     this.assignBombs(bombCount)
+
+    return this.board
   }
 
   assignBombs (bombCount) {

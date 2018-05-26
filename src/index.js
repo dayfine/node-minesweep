@@ -1,15 +1,21 @@
-const MineSweeperGame = require('./Game')
-const chalk = require('chalk')
-const minimist = require('minimist')
+const
+  MineSweeperGame = require('./Game'),
+  chalk = require('chalk'),
+  minimist = require('minimist'),
+  inquirer = require('inquirer')
 
 const argv = minimist(process.argv.slice(2))
-const prompt = chalk.blue('\nprompt > ')
-
 const game = new MineSweeperGame()
 
 game.init()
 
-process.stdout.write(prompt)
-process.stdin.on('data', data => {
-  console.log(`${data}`)
-})
+const question = {
+  name: 'initialPrompt',
+  message: `what's up?`
+}
+
+inquirer
+  .prompt([question])
+  .then(answers => {
+    console.log(answers)
+  })

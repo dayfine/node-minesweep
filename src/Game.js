@@ -11,7 +11,6 @@ class MineSweeperGame {
   init () {
     // start a game by initiating the state
     this.minefields = new MineFields(10, 20, 50)
-    console.log(this.minefields)
   }
 
   updateGameState () {
