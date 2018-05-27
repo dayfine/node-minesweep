@@ -8,7 +8,7 @@ class Field {
 
     this.state = {
       displayValue: null,
-      flagged: false
+      isFlagged: false
     }
   }
 
@@ -36,7 +36,7 @@ class Field {
 
   flagAsBomb () {
     // feel free to unflag it
-    this.state.flagged = !this.state.flagged
+    this.state.isFlagged = !this.state.isFlagged
   }
 
   getNeighbours (board) {
@@ -55,10 +55,19 @@ class Field {
 
     return neighbours
   }
+
+  getDisplayValue () {
+    const displayValue = this.state.displayValue || '?'
+    return this.state.isFlagged ? 'F' : displayValue
+  }
 }
 
 class MineFields {
   constructor (height, width, bombCount) {
+    this.height = height
+    this.width = width
+    this.bombCount = this.bombCount
+
     // make 2-D array as board
     this.board = [...new Array(height)].map((_, row) => {
       return [...new Array(width)].map((_, col) => {
@@ -67,8 +76,6 @@ class MineFields {
     })
 
     this.assignBombs(bombCount)
-
-    return this.board
   }
 
   assignBombs (bombCount) {
@@ -94,6 +101,10 @@ class MineFields {
       const col = idx % width
       this.board[row][col].hasBomb = true
     }
+  }
+
+  getField (x, y) {
+    return this.board[x][y]
   }
 }
 
