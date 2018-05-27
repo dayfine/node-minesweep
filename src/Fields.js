@@ -8,6 +8,7 @@ class Field {
 
     this.state = {
       displayValue: null,
+      checked: false,
       isFlagged: false
     }
   }
@@ -18,20 +19,23 @@ class Field {
 
   checkFieldBombCount (board) {
     // this one has already been checked!
-    if (this.state.displayValue) return
+    if (this.state.checked) return
+    this.state.checked = true
 
-    const neighbours = board.getNeighbours(this)
+    const neighbours = this.getNeighbours(board)
     let bombCount = 0
 
     neighbours.forEach(field => {
       if (field.hasBomb) {
         bombCount += 1
       } else {
-        board.getNeighbours(field).forEach(_ => _.checkFieldBombCount(board))
+        this.getNeighbours(board).forEach(_ => {
+          if (!_.state.checked) _.checkFieldBombCount(board)
+        })
       }
     })
 
-    this.state.displayValue = bombCount
+    this.state.displayValue = String(bombCount)
   }
 
   flagAsBomb () {
@@ -48,7 +52,7 @@ class Field {
       .forEach(([x, y]) => {
         const nx = this.x + x
         const ny = this.y + y
-        if (nx >= 0 && nx <= height && ny >= 0 && ny <= width) {
+        if (nx >= 0 && nx < height && ny >= 0 && ny < width) {
           neighbours.push(board[nx][ny])
         }
       })

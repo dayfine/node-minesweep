@@ -10,7 +10,7 @@ class MineSweeperGame {
 
   init () {
     // start a game by initiating the state
-    this.mineFields = new MineFields(10, 20, 50)
+    this.mineFields = new MineFields(24, 24, 99)
     this.cursorPos = [0, 0]
   }
 
@@ -20,7 +20,7 @@ class MineSweeperGame {
 
     switch (action.type) {
       case 'open':
-        field.checkFieldBombCount(this.mineFields)
+        field.checkFieldBombCount(this.mineFields.board)
         break
       case 'flag':
         field.flagAsBomb()
