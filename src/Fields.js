@@ -17,6 +17,11 @@ class Field {
     return `<Field bomb:${this.hasBomb}>`
   }
 
+  checkField () {
+    if (this.hasBomb) throw Error('Baaannnnnggg!!!')
+    this.checkFieldBombCount()
+  }
+
   checkFieldBombCount (board) {
     // this one has already been checked!
     if (this.state.checked || this.hasBomb) return
@@ -30,7 +35,10 @@ class Field {
         bombCount += 1
       } else {
         this.getNeighbours(board).forEach(_ => {
-          if (!_.state.checked) _.checkFieldBombCount(board)
+          if (!_.state.checked &&
+            (_.x === this.x || _.y === this.y)) {
+            _.checkFieldBombCount(board)
+          }
         })
       }
     })

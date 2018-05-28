@@ -1,10 +1,8 @@
 const
   blessed = require('blessed'),
-  chalk = require('chalk'),
   MineSweeperGame = require('./Game')
 
 const game = new MineSweeperGame()
-
 game.init()
 const mineFields = game.mineFields
 
@@ -15,22 +13,29 @@ const screen = blessed.screen({
 
 screen.title = 'MineSweeper'
 
-function getBoardData (board) {
-  return board.map((row, rowIdx) => row.map((col, colIdx) => {
-    const field = board[rowIdx][colIdx]
-    return field.getDisplayValue()
-  }))
+function makeBox (content, size, top, left) {
+  return blessed.box({
+    content,
+    top,
+    left,
+    width: size,
+    height: size,
+    border: {
+      type: 'line'
+    },
+    align: 'center',
+    padding: 'none',
+    style: {
+      fg: 'white',
+      border: {
+        fg: '#f0f0f0'
+      },
+      hover: {
+        bg: 'green'
+      }
+    }
+  })
 }
-
-let tableData = getBoardData(mineFields.board)
-console.log(tableData)
-
-const table = blessed.table({
-  data: tableData,
-  border: {
-    type: 'line'
-  }
-})
 
 const infoBox = blessed.box({
   top: '90%',
@@ -43,21 +48,39 @@ const infoBox = blessed.box({
   }
 })
 
-screen.append(table)
+const boxMap = {}
+
+function updateBoard (board) {
+  board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
+    const field = board[rowIdx][colIdx]
+    const box = boxMap[`${rowIdx}-${colIdx}`]
+    box.setContent(field.getDisplayValue())
+  }))
+}
+
+function makeBoard (board) {
+  const size = Math.round(70 / board[0].length)
+
+  board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
+    const field = board[rowIdx][colIdx]
+    const top = `${size * rowIdx}%`
+    const left = `${size * colIdx}%`
+
+    const box = makeBox(field.getDisplayValue(), `${size}%`, top, left)
+    boxMap[`${rowIdx}-${colIdx}`] = box
+    screen.append(box)
+
+    box.on('click', () => {
+      game.play({ type: 'open', position: [rowIdx, colIdx] })
+      infoBox.setContent(`>>> ${rowIdx}|${colIdx}`)
+      updateBoard(board)
+      screen.render()
+    })
+  }))
+}
+
+makeBoard(mineFields.board)
 screen.append(infoBox)
-
-table.on('click', function ({ x, y }) {
-  const { height, width } = table
-  const boardHeight = mineFields.height
-  const boardWitdh = mineFields.width
-  const row = Math.floor(y / height * boardHeight)
-  const col = Math.floor(x / width * boardWitdh)
-
-  game.play({ type: 'open', position: [row, col] })
-  table.setData(getBoardData(mineFields.board))
-  infoBox.setContent(`${x}|${y}|${height}|${width}|${row}|${col}`)
-  screen.render()
-})
 
 screen.key(['escape', 'C-c'], (ch, key) => process.exit(0))
 
