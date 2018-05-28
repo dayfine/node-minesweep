@@ -7,7 +7,7 @@ class Field {
     this.hasBomb = hasBomb
 
     this.state = {
-      displayValue: null,
+      displayValue: '',
       checked: false,
       isFlagged: false
     }
@@ -19,7 +19,7 @@ class Field {
 
   checkFieldBombCount (board) {
     // this one has already been checked!
-    if (this.state.checked) return
+    if (this.state.checked || this.hasBomb) return
     this.state.checked = true
 
     const neighbours = this.getNeighbours(board)
@@ -35,7 +35,7 @@ class Field {
       }
     })
 
-    this.state.displayValue = String(bombCount)
+    this.state.displayValue = bombCount === 0 ? '' : String(bombCount)
   }
 
   flagAsBomb () {
@@ -61,8 +61,10 @@ class Field {
   }
 
   getDisplayValue () {
-    const displayValue = this.state.displayValue || '?'
-    return this.state.isFlagged ? 'F' : displayValue
+    const { checked, isFlagged, displayValue } = this.state
+    if (!checked) return '?'
+    if (isFlagged) return 'F'
+    return displayValue
   }
 }
 
@@ -70,7 +72,7 @@ class MineFields {
   constructor (height, width, bombCount) {
     this.height = height
     this.width = width
-    this.bombCount = this.bombCount
+    this.bombCount = bombCount
 
     // make 2-D array as board
     this.board = [...new Array(height)].map((_, row) => {

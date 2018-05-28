@@ -15,29 +15,47 @@ const screen = blessed.screen({
 
 screen.title = 'MineSweeper'
 
-function drawBoard (board) {
-  const data = board.map((row, rowIdx) => row.map((col, colIdx) => {
+function getBoardData (board) {
+  return board.map((row, rowIdx) => row.map((col, colIdx) => {
     const field = board[rowIdx][colIdx]
     return field.getDisplayValue()
   }))
-
-  return blessed.table({ data, border: { type: 'line' } })
 }
 
-let table = drawBoard(mineFields.board)
+let tableData = getBoardData(mineFields.board)
+console.log(tableData)
+
+const table = blessed.table({
+  data: tableData,
+  border: {
+    type: 'line'
+  }
+})
+
+const infoBox = blessed.box({
+  top: '90%',
+  left: '0%',
+  width: '100%',
+  height: '10%',
+  content: '>>>',
+  border: {
+    type: 'line'
+  }
+})
+
 screen.append(table)
+screen.append(infoBox)
 
 table.on('click', function ({ x, y }) {
-  const { height, width } = screen
-  const tableHeight = mineFields.height
-  const tableWitdh = mineFields.width
-  const row = Math.floor(y / height * tableHeight)
-  const col = Math.floor(x / width * tableWitdh)
+  const { height, width } = table
+  const boardHeight = mineFields.height
+  const boardWitdh = mineFields.width
+  const row = Math.floor(y / height * boardHeight)
+  const col = Math.floor(x / width * boardWitdh)
 
   game.play({ type: 'open', position: [row, col] })
-  table.destroy()
-  table = drawBoard(mineFields.board)
-  screen.append(table)
+  table.setData(getBoardData(mineFields.board))
+  infoBox.setContent(`${x}|${y}|${height}|${width}|${row}|${col}`)
   screen.render()
 })
 
