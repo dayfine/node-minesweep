@@ -4,13 +4,13 @@ class MineSweeperGame {
   constructor () {
     this.state = {
       board: null,
-      cursorPos: null
+      gameStatus: null
     }
   }
 
   init () {
     // start a game by initiating the state
-    this.mineFields = new MineFields(10, 10, 40)
+    this.mineFields = new MineFields(8, 8, 10)
     this.cursorPos = [0, 0]
   }
 
@@ -20,7 +20,11 @@ class MineSweeperGame {
 
     switch (action.type) {
       case 'open':
-        field.checkFieldBombCount(this.mineFields.board)
+        try {
+          field.checkField(this.mineFields.board)
+        } catch (e) {
+          this.state.gameStatus = false
+        }
         break
       case 'flag':
         field.flagAsBomb()
@@ -28,20 +32,25 @@ class MineSweeperGame {
       default:
         break
     }
-  }
 
-  updateGameState () {
-    // update state based on player actoin
+    // check if game is won
+    const allchecked = this.mineFields.getAllFields().every(field => {
+      if (field.hasBomb && field.state.isFlagged) return true
+      if (!field.hasBomb && field.state.checked) return true
+      return false
+    })
+
+    if (allchecked) {
+      this.state.gameStatus = true
+    }
   }
 
   isGameWon () {
-    console.log('you won!')
-    this.cleanUp()
+    return this.state.gameStatus === true
   }
 
   isGameOver () {
-    console.log('you lose!')
-    this.cleanUp()
+    return this.state.gameStatus === false
   }
 
   cleanUp () {

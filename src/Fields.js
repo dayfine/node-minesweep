@@ -17,9 +17,9 @@ class Field {
     return `<Field bomb:${this.hasBomb}>`
   }
 
-  checkField () {
+  checkField (board) {
     if (this.hasBomb) throw Error('Baaannnnnggg!!!')
-    this.checkFieldBombCount()
+    this.checkFieldBombCount(board)
   }
 
   checkFieldBombCount (board) {
@@ -28,21 +28,11 @@ class Field {
     this.state.checked = true
 
     const neighbours = this.getNeighbours(board)
-    let bombCount = 0
+    let bombCount = neighbours.reduce((count, field) => {
+      return count + Number(field.hasBomb)
+    }, 0)
 
-    neighbours.forEach(field => {
-      if (field.hasBomb) {
-        bombCount += 1
-      } else {
-        this.getNeighbours(board).forEach(_ => {
-          if (!_.state.checked &&
-            (_.x === this.x || _.y === this.y)) {
-            _.checkFieldBombCount(board)
-          }
-        })
-      }
-    })
-
+    if (bombCount === 0) neighbours.forEach(_ => _.checkFieldBombCount(board))
     this.state.displayValue = bombCount === 0 ? '' : String(bombCount)
   }
 
@@ -81,6 +71,7 @@ class MineFields {
     this.height = height
     this.width = width
     this.bombCount = bombCount
+    this.fieldsWithMine = []
 
     // make 2-D array as board
     this.board = [...new Array(height)].map((_, row) => {
@@ -114,11 +105,16 @@ class MineFields {
       const row = Math.floor(idx / width)
       const col = idx % width
       this.board[row][col].hasBomb = true
+      this.fieldsWithMine.push(this.board[row][col])
     }
   }
 
   getField (x, y) {
     return this.board[x][y]
+  }
+
+  getAllFields () {
+    return this.board.reduce((ret, row) => [...ret, ...row], [])
   }
 }
 

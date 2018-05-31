@@ -1,5 +1,6 @@
 const
   blessed = require('blessed'),
+  chalk = require('chalk'),
   MineSweeperGame = require('./Game')
 
 const game = new MineSweeperGame()
@@ -8,10 +9,22 @@ const mineFields = game.mineFields
 
 const screen = blessed.screen({
   smartCSR: true,
-  fullUnicode: true
+  fullUnicode: true,
+  autoPadding: false
 })
 
 screen.title = 'MineSweeper'
+
+const infoBox = blessed.box({
+  top: '90%',
+  left: '0%',
+  width: '100%',
+  height: '10%',
+  content: '>>>',
+  border: {
+    type: 'line'
+  }
+})
 
 function makeBox (content, size, top, left) {
   return blessed.box({
@@ -19,11 +32,11 @@ function makeBox (content, size, top, left) {
     top,
     left,
     width: size,
-    height: size,
+    height: 'shrink',
     border: {
       type: 'line'
     },
-    align: 'center',
+    shrink: true,
     padding: 'none',
     style: {
       fg: 'white',
@@ -37,16 +50,24 @@ function makeBox (content, size, top, left) {
   })
 }
 
-const infoBox = blessed.box({
-  top: '90%',
-  left: '0%',
-  width: '100%',
-  height: '10%',
-  content: '>>>',
-  border: {
-    type: 'line'
+function getDisplayValue (field) {
+  const value = field.getDisplayValue()
+
+  switch (value) {
+    case '1':
+      return chalk.blue('1')
+    case '2':
+      return chalk.green('2')
+    case '3':
+      return chalk.red('3')
+    case '4':
+      return chalk.cyan('4')
+    case '5':
+      return chalk.gray('5')
+    default:
+      return value
   }
-})
+}
 
 const boxMap = {}
 
@@ -54,7 +75,8 @@ function updateBoard (board) {
   board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
     const field = board[rowIdx][colIdx]
     const box = boxMap[`${rowIdx}-${colIdx}`]
-    box.setContent(field.getDisplayValue())
+
+    box.setContent(getDisplayValue(field))
   }))
 }
 
@@ -66,7 +88,7 @@ function makeBoard (board) {
     const top = `${size * rowIdx}%`
     const left = `${size * colIdx}%`
 
-    const box = makeBox(field.getDisplayValue(), `${size}%`, top, left)
+    const box = makeBox(getDisplayValue(field), `${size}%`, top, left)
     boxMap[`${rowIdx}-${colIdx}`] = box
     screen.append(box)
 
@@ -75,6 +97,10 @@ function makeBoard (board) {
       infoBox.setContent(`>>> ${rowIdx}|${colIdx}`)
       updateBoard(board)
       screen.render()
+
+      if (game.state.gameStatus === false) {
+        infoBox.setContent(`You Died`)
+      }
     })
   }))
 }
