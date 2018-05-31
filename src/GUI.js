@@ -28,7 +28,6 @@ class GUI {
       autoPadding: false
     })
 
-
     this.screen.title = 'MineSweeper'
 
     this.infoBox = blessed.box({
@@ -100,6 +99,10 @@ class GUI {
         return chalk.cyan('4')
       case '5':
         return chalk.gray('5')
+      case '?':
+        return chalk.black.bgWhite('?')
+      case 'F':
+        return chalk.white.bgRed('F')
       default:
         return value
     }
