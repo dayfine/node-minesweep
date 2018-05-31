@@ -71,7 +71,6 @@ class MineFields {
     this.height = height
     this.width = width
     this.bombCount = bombCount
-    this.fieldsWithMine = []
 
     // make 2-D array as board
     this.board = [...new Array(height)].map((_, row) => {
@@ -105,7 +104,6 @@ class MineFields {
       const row = Math.floor(idx / width)
       const col = idx % width
       this.board[row][col].hasBomb = true
-      this.fieldsWithMine.push(this.board[row][col])
     }
   }
 
