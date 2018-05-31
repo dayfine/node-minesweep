@@ -21,9 +21,10 @@ class MineSweeperGame {
     switch (action.type) {
       case 'open':
         try {
-          field.checkField(this.mineFields.board)
+          field.checkFieldBombCount(this.mineFields.board, true)
         } catch (e) {
           this.state.gameStatus = false
+          this.mineFields.showAllFields()
         }
         break
       case 'flag':
@@ -56,7 +57,7 @@ class MineSweeperGame {
   cleanUp () {
     this.state = {
       board: null,
-      cursorPos: null
+      gameStatus: null
     }
   }
 }

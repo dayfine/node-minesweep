@@ -17,15 +17,15 @@ class Field {
     return `<Field bomb:${this.hasBomb}>`
   }
 
-  checkField (board) {
-    if (this.hasBomb) throw Error('Baaannnnnggg!!!')
-    this.checkFieldBombCount(board)
-  }
-
-  checkFieldBombCount (board) {
-    // this one has already been checked!
-    if (this.state.checked || this.hasBomb) return
+  checkFieldBombCount (board, trigger = true) {
+    if (this.state.checked) return
     this.state.checked = true
+
+    if (this.hasBomb) {
+      this.state.displayValue = 'B'
+      if (trigger) throw Error('Baaannnnnggg!!!')
+      return
+    }
 
     const neighbours = this.getNeighbours(board)
     let bombCount = neighbours.reduce((count, field) => {
@@ -113,6 +113,10 @@ class MineFields {
 
   getAllFields () {
     return this.board.reduce((ret, row) => [...ret, ...row], [])
+  }
+
+  showAllFields () {
+    this.getAllFields().forEach(field => field.checkFieldBombCount(this.board, false))
   }
 }
 

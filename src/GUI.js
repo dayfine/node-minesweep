@@ -101,7 +101,7 @@ class GUI {
         this.screen.render()
 
         if (this.game.state.gameStatus === false) {
-          this.infoBox.setContent(`You Died!!!`)
+          this.infoBox.setContent(`You Hit Bomb!!!`)
         }
 
         if (this.game.state.gameStatus === true) {
