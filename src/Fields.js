@@ -17,10 +17,17 @@ class Field {
     return `<Field bomb:${this.hasBomb}>`
   }
 
-  checkFieldBombCount (board, trigger = true) {
-    if (this.state.checked) return
-    this.state.checked = true
+  checkField(board) {
+    this.state.checked
+      ? this.checkNeighbours(board)
+      : this.checkFieldBombCount(board)
+  }
 
+  checkFieldBombCount (board, skip = false, trigger = true) {
+    if (this.state.checked || this.state.isFlagged) return
+    if (this.hasBomb && skip) return
+
+    this.state.checked = true
     if (this.hasBomb) {
       this.state.displayValue = 'B'
       if (trigger) throw Error('Baaannnnnggg!!!')
@@ -28,12 +35,18 @@ class Field {
     }
 
     const neighbours = this.getNeighbours(board)
-    let bombCount = neighbours.reduce((count, field) => {
-      return count + Number(field.hasBomb)
-    }, 0)
+    const bombCount = neighbours.reduce((sum, _) => sum + Number(_.hasBomb), 0)
 
-    if (bombCount === 0) neighbours.forEach(_ => _.checkFieldBombCount(board))
-    this.state.displayValue = bombCount === 0 ? '' : String(bombCount)
+    if (bombCount === 0) {
+      neighbours.forEach(_ => _.checkFieldBombCount(board))
+    } else {
+      this.state.displayValue = String(bombCount)
+    }
+  }
+
+  checkNeighbours (board) {
+    const neighbours = this.getNeighbours(board)
+    neighbours.forEach(_ => _.checkFieldBombCount(board, true))
   }
 
   flagAsBomb () {
@@ -60,8 +73,8 @@ class Field {
 
   getDisplayValue () {
     const { checked, isFlagged, displayValue } = this.state
-    if (!checked) return '?'
     if (isFlagged) return 'F'
+    if (!checked) return '?'
     return displayValue
   }
 }
@@ -87,10 +100,8 @@ class MineFields {
     function getRandomInt (min, max) {
       return Math.floor(Math.random() * (max - min)) + min
     }
-    const height = this.board.length
-    const width = this.board[0].length
-    const totalFieldCount = height * width
 
+    const totalFieldCount = this.height * this.width
     if (bombCount > totalFieldCount) {
       throw new RangeError('Bomb count is larger than the size of the board')
     }
@@ -101,8 +112,8 @@ class MineFields {
       if (seen.has(idx)) continue
 
       seen.add(idx)
-      const row = Math.floor(idx / width)
-      const col = idx % width
+      const row = Math.floor(idx / this.width)
+      const col = idx % this.width
       this.board[row][col].hasBomb = true
     }
   }
@@ -116,7 +127,7 @@ class MineFields {
   }
 
   showAllFields () {
-    this.getAllFields().forEach(field => field.checkFieldBombCount(this.board, false))
+    this.getAllFields().forEach(_ => _.checkFieldBombCount(this.board, false, false))
   }
 }
 

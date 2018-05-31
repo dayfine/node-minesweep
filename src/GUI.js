@@ -1,23 +1,36 @@
 const
+  MineSweeperGame = require('./Game')
   blessed = require('blessed'),
   chalk = require('chalk')
 
 class GUI {
-  constructor (game) {
-    this.game = game
+  constructor () {
+    this.game = null
+    this.board = null
+    this.screen = null
+    this.boxMap = {}
+    this.focusedFieldIdx = null
+
+    this.initGame()
+    this.initGUI()
+  }
+
+  initGame () {
+    this.game = new MineSweeperGame()
+    this.game.init()
+    this.board = this.game.mineFields.board
+  }
+
+  initGUI () {
     this.screen = blessed.screen({
       smartCSR: true,
       fullUnicode: true,
       autoPadding: false
     })
 
+
     this.screen.title = 'MineSweeper'
-    this.boxMap = {}
 
-    this.initGUI()
-  }
-
-  initGUI () {
     this.infoBox = blessed.box({
       top: '90%',
       left: '0%',
@@ -30,11 +43,22 @@ class GUI {
     })
 
     this.screen.append(this.infoBox)
-
-    const { mineFields } = this.game
-    this.makeBoard(mineFields.board)
+    this.makeBoard()
 
     this.screen.key(['escape', 'C-c'], (ch, key) => process.exit(0))
+    this.screen.key('f', () => {
+      if (!this.focusedFieldIdx) return;
+
+      const [rowIdx, colIdx] = this.focusedFieldIdx
+      this.game.play({ type: 'flag', position: [rowIdx, colIdx] })
+      this.updateBoard()
+    })
+    this.screen.key('space', () => this.gameMoveCallBack(this.focusedFieldIdx))
+    this.screen.key('r', () => {
+      this.resetGame()
+      this.infoBox.setContent(`Go Again!`)
+    })
+
     this.screen.render()
   }
 
@@ -81,11 +105,11 @@ class GUI {
     }
   }
 
-  makeBoard (board) {
-    const size = Math.round(70 / board[0].length)
+  makeBoard () {
+    const size = Math.round(85 / this.board[0].length)
 
-    board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
-      const field = board[rowIdx][colIdx]
+    this.board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
+      const field = this.board[rowIdx][colIdx]
       const top = `${size * rowIdx}%`
       const left = `${size * colIdx}%`
 
@@ -94,30 +118,46 @@ class GUI {
       this.boxMap[`${rowIdx}-${colIdx}`] = box
       this.screen.append(box)
 
-      box.on('click', () => {
-        this.game.play({ type: 'open', position: [rowIdx, colIdx] })
-        this.infoBox.setContent(`>>> ${rowIdx}|${colIdx}`)
-        this.updateBoard(board)
-        this.screen.render()
-
-        if (this.game.state.gameStatus === false) {
-          this.infoBox.setContent(`You Hit Bomb!!!`)
-        }
-
-        if (this.game.state.gameStatus === true) {
-          this.infoBox.setContent(`You Won!!!`)
-        }
+      box.on('click', () => this.gameMoveCallBack([rowIdx, colIdx]))
+      box.on('mouseover', () => {
+        this.focusedFieldIdx = [rowIdx, colIdx]
       })
     }))
   }
 
-  updateBoard (board) {
-    board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
-      const field = board[rowIdx][colIdx]
+  gameMoveCallBack ([rowIdx, colIdx]) {
+    this.game.play({ type: 'open', position: [rowIdx, colIdx] })
+      this.updateBoard()
+
+      if (this.game.state.gameStatus === false) {
+        this.infoBox.setContent(`You Hit Bomb!!!`)
+        this.screen.render()
+      }
+
+      if (this.game.state.gameStatus === true) {
+        this.infoBox.setContent(`You Won!!!`)
+        this.screen.render()
+      }
+  }
+
+  updateBoard () {
+    this.board.forEach((row, rowIdx) => row.forEach((col, colIdx) => {
+      const field = this.board[rowIdx][colIdx]
       const box = this.boxMap[`${rowIdx}-${colIdx}`]
 
       box.setContent(this.getFieldDisplayValue(field))
     }))
+
+    this.screen.render()
+  }
+
+  resetGame () {
+    this.boxMap = {}
+    this.focusedFieldIdx = null
+    this.screen.destroy()
+
+    this.initGame()
+    this.initGUI()
   }
 }
 

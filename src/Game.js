@@ -8,10 +8,9 @@ class MineSweeperGame {
     }
   }
 
-  init () {
+  init (height = 8, width = 8, numBombs = 10) {
     // start a game by initiating the state
-    this.mineFields = new MineFields(8, 8, 10)
-    this.cursorPos = [0, 0]
+    this.mineFields = new MineFields(height, width, numBombs)
   }
 
   play (action) {
@@ -21,7 +20,7 @@ class MineSweeperGame {
     switch (action.type) {
       case 'open':
         try {
-          field.checkFieldBombCount(this.mineFields.board, true)
+          field.checkField(this.mineFields.board)
         } catch (e) {
           this.state.gameStatus = false
           this.mineFields.showAllFields()
